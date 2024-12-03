@@ -23,7 +23,7 @@ Para instalar o Python, acesse o [Link](https://www.python.org/downloads/).
 
 Você pode instalar as dependências necessárias com o seguinte comando:
 
-```bash
+```bashq
 python -m venv myvenv 
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 .\myvenv\Scripts\activate  
