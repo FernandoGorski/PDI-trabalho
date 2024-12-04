@@ -31,6 +31,7 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 pip install opencv-python
 pip install tf-keras
 pip install deepface
+pip install matplotlib
 ```
 
 ## Possívies Problemas
