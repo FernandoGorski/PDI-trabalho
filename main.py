@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 # Caminho do vídeo
-video_path = r'C:\Users\ferna\Desktop\Processamento Digital de Imagens\PDI-trabalho\Comercial1.mp4'
+video_path = r'"C:\Users\Hygor\Documents\Programas\PDI-trabalho\A Freira.mp4"'
 
 # Inicializa a captura da webcam
 cap_webcam = cv2.VideoCapture(0)
