@@ -1,14 +1,17 @@
-# Projeto de Detecção de Emoções com OpenCV e DeepFace para Descobrir a Cor Favorita
+# Projeto de Detecção de Emoções com OpenCV e DeepFace para Descobrir o Engajamento em Vídeos
 
 ## Descrição
 
-Este projeto tem como objetivo implementar um sistema que captura imagens de uma webcam e detecta emoções faciais, alterando a cor de um quadrado na tela com base nas emoções identificadas. A cor favorita da pessoa é determinada pela emoção mais predominante durante o processo.
+Este projeto tem como objetivo desenvolver um sistema que utiliza a biblioteca OpenCV e o modelo DeepFace para analisar as emoções faciais dos usuários enquanto assistem a vídeos. A aplicação será capaz de capturar imagens em tempo real por meio da webcam, identificar as expressões faciais e associar as emoções detectadas ao nível de engajamento do usuário com o conteúdo exibido.
 
 ## Universidade Federal do Paraná
 
 - **Setor de Educação Profissional e Tecnológica**
-- **Alunos:** Fernando Guilherme Gorski e Hygor Adriano Tristão
-- **Professor:** Dr. Luiz Antônio Pereira Neves
+- **Alunos:** 
+- Fernando Guilherme Gorski 
+- Hygor Adriano Tristão
+- **Professor Orientador:** 
+- Dr. Luiz Antônio Pereira Neves
 
 ## Pré-requisitos
 
@@ -21,7 +24,7 @@ Antes de começar, verifique se você tem os seguintes requisitos instalados:
 
 Para instalar o Python, acesse o [Link](https://www.python.org/downloads/).
 
-Você pode instalar as dependências necessárias com o seguinte comando:
+Você pode instalar as dependências necessárias com o seguinte comando (Execute uma linha por vez, na ordem abaixo):
 
 ```bashq
 python -m venv myvenv 
