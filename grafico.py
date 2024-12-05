@@ -5,7 +5,7 @@ from collections import defaultdict
 relatorio_path = "relatorio.txt"
 
 # Dicionário para armazenar as emoções por segundo
-emocao_por_segundo = defaultdict(list)
+emocao_por_secundo = defaultdict(list)
 
 # Emoções possíveis (de acordo com os dados do relatório)
 emocao_possiveis = ['alegre', 'triste', 'raiva', 'surpreso', 'neutro', 'medo']
@@ -18,45 +18,55 @@ with open(relatorio_path, "r") as f:
         emocao = emocao.strip()
         segundo = int(segundo.split()[1])  # Extrair o número do segundo
         
-        # Adiciona a emoção à lista de emoções do segundo
-        emocao_por_segundo[segundo].append(emocao)
+        # Adicionar a emoção à lista de emoções do segundo
+        emocao_por_secundo[segundo].append(emocao)
 
-# Preparando dados para o gráfico
-segundos = sorted(emocao_por_segundo.keys())
+# Preparar os dados para o gráfico
+segundos = sorted(emocao_por_secundo.keys())
+segundos_completos = list(range(min(segundos), max(segundos) + 1))  # Preencher de segundo em segundo
 
 # Determinar a emoção dominante para cada segundo
-emo_dominante_por_segundo = []
-for sec in segundos:
-    # Encontrar a emoção mais frequente no segundo (em caso de empate, escolher a primeira)
-    emocao_dominante = max(set(emocao_por_segundo[sec]), key=emocao_por_segundo[sec].count)
-    emo_dominante_por_segundo.append(emocao_dominante)
+emo_dominante_por_secundo = []
+for sec in segundos_completos:
+    if sec in emocao_por_secundo:
+        # Encontrar a emoção mais frequente no segundo
+        emocao_dominante = max(set(emocao_por_secundo[sec]), key=emocao_por_secundo[sec].count)
+    else:
+        # Preencher segundos ausentes com 'neutro'
+        emocao_dominante = 'neutro'
+    emo_dominante_por_secundo.append(emocao_dominante)
 
-# Criando o gráfico com fundo preto
-fig, ax = plt.subplots(figsize=(10, 6))
+# Criando o gráfico com os eixos invertidos
+fig, ax = plt.subplots(figsize=(12, 8))
 
-# Definindo a cor de fundo do gráfico
-fig.patch.set_facecolor('black')  # Cor de fundo da figura (gráfico)
-ax.set_facecolor('black')  # Cor de fundo do eixo
+# Adicionar a linha conectando os valores
+ax.plot(
+    segundos_completos,
+    [emocao_possiveis.index(emo) for emo in emo_dominante_por_secundo],
+    color='green',
+    linestyle='-',
+    linewidth=2,
+    marker='o',
+    markersize=6,
+    markerfacecolor='green'
+)
 
-# Conectar os pontos com uma linha tracejada branca (hipotenusa)
-ax.plot(segundos, [emocao_possiveis.index(emo) for emo in emo_dominante_por_segundo],
-        linestyle='--', color='white', linewidth=3)  # Linha tracejada branca grossa
+# Ajustando os rótulos e os eixos
+ax.set_facecolor('white')
+fig.patch.set_facecolor('white')
+plt.ylabel('Emoções', color='black')  # Emoções no eixo Y
+plt.xlabel('Segundos', color='black')  # Segundos no eixo X
+plt.title('Emoção Dominante por Segundo', color='black')
 
-# Alterando a cor dos rótulos
-ax.tick_params(axis='x', colors='white')  # Cor dos rótulos do eixo X
-ax.tick_params(axis='y', colors='white')  # Cor dos rótulos do eixo Y
-plt.xlabel('Segundo', color='white')  # Cor do rótulo do eixo X
-plt.ylabel('Emoções', color='white')  # Cor do rótulo do eixo Y
+# Definir as emoções como rótulos do eixo Y
+plt.yticks(range(len(emocao_possiveis)), emocao_possiveis, color='black')
+plt.xticks(segundos_completos, rotation=45, color='black')  # Exibir todos os segundos
 
-# Alterando a cor do título
-plt.title('Emoção Dominante por Segundo', color='white')
+# Adicionar uma matriz bem sutil no fundo
+ax.grid(True, which='both', axis='both', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
 
-# Definindo as emoções no eixo Y
-plt.yticks(range(len(emocao_possiveis)), emocao_possiveis, color='white')  # Cor dos rótulos do eixo Y
-
-plt.xticks(segundos, rotation=45)
-plt.grid(True, color='gray')  # Cor da grade
+# Melhorar o layout
+plt.tight_layout()
 
 # Exibir o gráfico
-plt.tight_layout()
 plt.show()

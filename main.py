@@ -1,8 +1,20 @@
+import os
 import cv2
-import numpy as np
-import time
 from deepface import DeepFace
+import time
+import numpy as np
 
+# Caminho do vídeo
+video_path = r'C:\Users\ferna\Desktop\Processamento Digital de Imagens\PDI-trabalho\Comercial1.mp4'
+
+# Inicializa a captura da webcam
+cap_webcam = cv2.VideoCapture(0)
+
+if not cap_webcam.isOpened():
+    print("Erro ao abrir a webcam.")
+    exit()
+
+# Dicionário de emoções traduzidas
 emocao = {
     'happy': 'alegre',
     'sad': 'triste',
@@ -12,105 +24,88 @@ emocao = {
     'fear': 'medo'
 }
 
-# Função para detectar a emoção
-def detectarEmocao(frame):
-    try:
-        resultado = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-        if isinstance(resultado, dict):
-            emocao_dominante = resultado.get('dominant_emotion', None)
-        elif isinstance(resultado, list) and len(resultado) > 0:
-            emocao_dominante = resultado[0].get('dominant_emotion', None)
-        else:
-            emocao_dominante = None
+# Abre o arquivo de relatório para escrever as emoções
+relatorio_path = "relatorio.txt"
+with open(relatorio_path, "w") as f:
+    f.write("Relatorio de Emocoes Detectadas\n")
+    f.write("====================================\n")
 
-        if emocao_dominante:
-            return emocao.get(emocao_dominante, 'desconhecida')
-        return None
-    except Exception as e:
-        print(f"Erro ao detectar emoção: {e}")
-        return None
+def analisar_expressao(frame):
+    # Analisar a emoção no frame da webcam
+    analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
+    dominant_emotion = analysis[0]['dominant_emotion']
+    return dominant_emotion
 
-# Imagem Binária
-def binarizarImagem(frame):
-    cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    _, binario = cv2.threshold(cinza, 127, 255, cv2.THRESH_BINARY)
-    return binario
+# Abre o vídeo para obter informações de duração
+cap_video = cv2.VideoCapture(video_path)
+if not cap_video.isOpened():
+    print("Erro ao abrir o vídeo.")
+    exit()
 
-# Imagem Borrada
-def aplicarBorramento(frame):
-    return cv2.GaussianBlur(frame, (15, 15), 0)
+fps_video = cap_video.get(cv2.CAP_PROP_FPS)
+total_frames = int(cap_video.get(cv2.CAP_PROP_FRAME_COUNT))
+video_duration = total_frames / fps_video
+print(f"Duração do vídeo: {video_duration} segundos")
 
-# Configuração da detecção de rosto
-faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-video = cv2.VideoCapture(0)
+cap_video.release()
 
-cores = [
-    (0, 0, 255),  # Vermelho
-    (0, 255, 255),  # Amarelo
-    (0, 255, 0),  # Verde
-    (255, 0, 0),  # Azul
-    (255, 165, 0),  # Laranja
-    (255, 0, 255),  # Roxo
-    (255, 255, 255),  # Branco
-    (0, 0, 0)  # Preto
-]
+os.startfile(video_path)
 
-nomesCores = ['vermelho', 'amarelo', 'verde', 'azul', 'laranja', 'roxo', 'branco', 'preto']
-tempoTotal = 40  
-tempoCor = tempoTotal / len(cores)
-inicio = time.time()
+time.sleep(1)
 
-emocaoCor = {cor: {emo: 0 for emo in emocao.values()} for cor in nomesCores}
+extra_time = 0.5
+start_time = time.time()
 
 while True:
-    ret, frame = video.read()
-    if not ret:
+    ret_webcam, frame_webcam = cap_webcam.read()
+    if not ret_webcam:
         break
 
-    imagemOriginal = frame.copy()
+    # Detecção de rosto usando DeepFace
+    try:
+        # DeepFace detecta rostos e retorna as coordenadas
+        analysis = DeepFace.analyze(frame_webcam, actions=['emotion'], enforce_detection=True)
+        face = analysis[0]['region']  # 'region' contém as coordenadas do rosto
+        emotion = analysis[0]['dominant_emotion']  # Emoção detectada
 
-    cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    rostos = faceCascade.detectMultiScale(cinza, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-    
-    # Atualizar cor de fundo 
-    tempoAtual = time.time() - inicio
-    indice = int(tempoAtual // tempoCor) % len(cores)
-    corAtual = cores[indice]
-    nomeCor = nomesCores[indice]
-    
-    # Exibir a cor no canto da tela
-    cv2.rectangle(frame, (frame.shape[1] - 150, 50), (frame.shape[1] - 50, 150), corAtual, -1)
-    
-    # Detecção de emoção
-    emocao_detectada = detectarEmocao(frame)
-    if emocao_detectada:
-        print(f"Emoção detectada para a cor {nomeCor}: {emocao_detectada}")
-        if emocao_detectada in emocaoCor[nomeCor]:
-            emocaoCor[nomeCor][emocao_detectada] += 1
-
-    imagem_binarizada = binarizarImagem(frame)
-    frame_borrado = aplicarBorramento(frame)
-    
-    cv2.imshow("Imagem", frame)
-    cv2.imshow("Imagem Binarizada", imagem_binarizada)
-    cv2.imshow("Imagem Borrada", frame_borrado)
-
-    tempoAtual = time.time() - inicio
-    if tempoAtual >= tempoTotal:
-        print("\nResumo das emoções detectadas por cor:")
-        for cor, contagens in emocaoCor.items():
-            print(f"Cor {cor}: {contagens}")
+        x, y, w, h = face['x'], face['y'], face['w'], face['h']
         
-        # Determinar a cor favorita com base na emoção mais positiva associada
-        corFavorita = max(
-            nomesCores,
-            key=lambda cor: emocaoCor[cor]['alegre']
-        )
-        print(f"A cor favorita é: {corFavorita}")
+        # Desenhar um quadrado ao redor do rosto detectado
+        cv2.rectangle(frame_webcam, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        # Exibir a emoção detectada no rosto
+        cv2.putText(frame_webcam, 
+                    f'{emocao.get(emotion, emotion)}',  # Exibe a emoção em português
+                    (x, y - 10),  # Posiciona o texto acima do rosto
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+    except Exception as e:
+        print(f"Erro na detecção de rosto com DeepFace: {e}")
+        continue
+
+    # Mostrar as imagens
+    cv2.imshow('Webcam', frame_webcam)
+
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+    if elapsed_time >= video_duration + extra_time:
+        print("Finalizando análise.")
         break
+
+    # Mostrar a emoção no console
+    emotion_pt = emocao.get(emotion, emotion)
+    analysis_second = int(elapsed_time-1)
+    print(f"Emoção detectada: {emotion_pt} no segundo {analysis_second}")
+
+    # Salvar a emoção no arquivo de relatório
+    with open(relatorio_path, "a") as f:
+        f.write(f"Segundo {analysis_second}: {emotion_pt}\n")
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-video.release()
+# Libera os recursos
+cap_webcam.release()
 cv2.destroyAllWindows()
+
+print(f"Relatório de emoções salvo em {relatorio_path}")
