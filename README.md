@@ -1,4 +1,4 @@
-S# Projeto de Detecção de Emoções com OpenCV e DeepFace para Descobrir o Engajamento em Vídeos
+# Projeto de Detecção de Emoções com OpenCV e DeepFace para Descobrir o Engajamento em Vídeos
 
 ## Descrição
 
